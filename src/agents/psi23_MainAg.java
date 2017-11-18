@@ -1,21 +1,30 @@
 package agents;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import gui_interface.psi23_GUI;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import util.SortPlayerID;
+import util.SortPlayerPosition;
 
 public class psi23_MainAg extends Agent {
 
@@ -25,7 +34,11 @@ public class psi23_MainAg extends Agent {
 	private int id_given = 0;
 	private boolean stop_gameBehaviour;
 	private boolean finish_game;
-	private TickerBehaviour gameBehaviour;
+	private agents.psi23_MainAg.gameBehaviour gameBehaviour;
+	private boolean first_round, winner_round;
+	private int pos_winner_round;
+	private int numero_de_juegos_por_partida = 2;
+	private int played_juegos;
 
 	protected void setup() {
 		init();
@@ -69,7 +82,6 @@ public class psi23_MainAg extends Agent {
 			}
 		});
 
-		addBehaviour(new finish_game_Behaviour());
 	}
 
 	protected void init() {
@@ -104,6 +116,18 @@ public class psi23_MainAg extends Agent {
 		System.out.println("Main Agent " + getAID().getName() + " terminating.");
 	}
 
+	private int total_players_in_game() {
+		int total_players = 0;
+		Iterator<?> it = table_aid_player.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
+			if (pair.getValue().isInGame() && pair.getValue().getPosition() != -1) {
+				total_players++;
+			}
+		}
+		return total_players;
+	}
+
 	private String list_ids_players_in_game() {
 		String list = "";
 		Iterator<?> it = table_aid_player.entrySet().iterator();
@@ -120,13 +144,50 @@ public class psi23_MainAg extends Agent {
 	}
 
 	private void assign_position_round() {
-		int position_temp = 1;
-		Iterator<?> it = table_aid_player.entrySet().iterator();
+		int pos_temp = 1;
+
+		Map<AID, psi23_Player> sorted_table_aid_player = new LinkedHashMap<AID, psi23_Player>();
+
+		List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
+				table_aid_player.entrySet());
+		Collections.sort(list, new SortPlayerID());
+		for (Entry<AID, psi23_Player> entry : list) {
+			sorted_table_aid_player.put(entry.getKey(), entry.getValue());
+		}
+
+		Iterator<?> it = sorted_table_aid_player.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
 			if (pair.getValue().isInGame()) {
-				pair.getValue().setPosition(position_temp);
-				position_temp++;
+				pair.getValue().setPosition(pos_temp);
+				pos_temp++;
+			}
+		}
+	}
+
+	private void assign_position_consecutive_round() {
+		int num_winner = 0;
+
+		Map<AID, psi23_Player> sorted_table_aid_player = new LinkedHashMap<AID, psi23_Player>();
+
+		List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
+				table_aid_player.entrySet());
+		Collections.sort(list, new SortPlayerPosition());
+		for (Entry<AID, psi23_Player> entry : list) {
+			sorted_table_aid_player.put(entry.getKey(), entry.getValue());
+		}
+
+		Iterator<?> it = sorted_table_aid_player.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
+			if (!pair.getValue().isInGame())
+				num_winner++;
+			if (pair.getValue().isInGame()) {
+				if (pair.getValue().getPosition() == 1) {
+					pair.getValue().setPosition(total_players_in_game());
+				} else {
+					pair.getValue().setPosition(pair.getValue().getPosition() - 1 - num_winner);
+				}
 			}
 		}
 	}
@@ -215,17 +276,30 @@ public class psi23_MainAg extends Agent {
 			System.out.println(getAID().getLocalName() + " => El ganador fue => " + player_winner.getLocalName());
 			table_aid_player.get(player_winner).setGames_win(table_aid_player.get(player_winner).getGames_win() + 1);
 			table_aid_player.get(player_winner).setInGame(false);
-			table_aid_player.get(player_winner).setPosition(-1);
 			table_aid_player.get(player_winner).setMybet(-1);
 			table_aid_player.get(player_winner).setMycoins(-1);
+			pos_winner_round = table_aid_player.get(player_winner).getPosition();
+			winner_round = true;
 		} else {
 			System.out.println(getAID().getLocalName() + " => No hubo ganador esta ronda.");
+			winner_round = false;
 		}
 		System.out.println("-----------------------------------------------------");
 	}
 
+	private void set_all_players_in_game() {
+		Iterator<?> it = table_aid_player.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
+			pair.getValue().setInGame(true);
+		}
+	}
+
 	public void initGameBehaviour() {
-		gameBehaviour = new gameBehaviour(this, 10000);
+		set_all_players_in_game();
+		finish_game_Behaviour();
+		first_round = true;
+		gameBehaviour gameBehaviour = new gameBehaviour();
 		addBehaviour(gameBehaviour);
 	}
 
@@ -253,24 +327,34 @@ public class psi23_MainAg extends Agent {
 		this.finish_game = finish_game;
 	}
 
-	private class gameBehaviour extends TickerBehaviour {
+	private class gameBehaviour extends Behaviour {
 
 		private int step = 0;
 
-		public gameBehaviour(Agent a, long period) {
-			super(a, period);
-		}
+		private Map<AID, psi23_Player> sorted_table_aid_player;
 
 		@Override
-		protected void onTick() {
-			if (!stop_gameBehaviour && !finish_game) {
+		public void action() {
+			if (!stop_gameBehaviour) {
 				switch (step) {
 				case 0:
-					assign_position_round();
+					if (first_round) {
+						assign_position_round();
+					} else {
+						assign_position_consecutive_round();
+					}
 					step++;
 					break;
 				case 1:
-					Iterator<Entry<AID, psi23_Player>> it = table_aid_player.entrySet().iterator();
+					sorted_table_aid_player = new LinkedHashMap<AID, psi23_Player>();
+					List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
+							table_aid_player.entrySet());
+					Collections.sort(list, new SortPlayerPosition());
+					for (Entry<AID, psi23_Player> entry : list) {
+						sorted_table_aid_player.put(entry.getKey(), entry.getValue());
+					}
+
+					Iterator<Entry<AID, psi23_Player>> it = sorted_table_aid_player.entrySet().iterator();
 					while (it.hasNext()) {
 						Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
 						if (pair.getValue().getPosition() != -1 && pair.getValue().isInGame()) {
@@ -282,7 +366,7 @@ public class psi23_MainAg extends Agent {
 						}
 					}
 
-					Iterator<Entry<AID, psi23_Player>> it2 = table_aid_player.entrySet().iterator();
+					Iterator<Entry<AID, psi23_Player>> it2 = sorted_table_aid_player.entrySet().iterator();
 					while (it2.hasNext()) {
 						Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it2.next();
 						if (pair.getValue().getPosition() != -1 && pair.getValue().isInGame()) {
@@ -294,30 +378,27 @@ public class psi23_MainAg extends Agent {
 					}
 					step++;
 					break;
-
 				case 2:
-					Iterator<?> it3 = table_aid_player.entrySet().iterator();
+					Iterator<?> it3 = sorted_table_aid_player.entrySet().iterator();
 					while (it3.hasNext()) {
 						Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it3.next();
 						if (pair.getValue().getPosition() != -1 && pair.getValue().isInGame()) {
-
 							ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
 							request.addReceiver(pair.getKey());
 							request.setContent("GuessCoins#" + list_bets_players_in_game());
 							send(request);
 							ACLMessage msg2 = blockingReceive();
-							table_aid_player.get(msg2.getSender())
+							sorted_table_aid_player.get(msg2.getSender())
 									.setMybet(Integer.parseInt(msg2.getContent().split("#")[1]));
 							System.out.println(getAID().getLocalName() + " => el Player ("
 									+ msg2.getSender().getLocalName() + ") ha apostado "
-									+ table_aid_player.get(msg2.getSender()).getMybet() + " monedas");
+									+ sorted_table_aid_player.get(msg2.getSender()).getMybet() + " monedas");
 						}
 					}
 					step++;
 					break;
-
 				case 3:
-					Iterator<?> it4 = table_aid_player.entrySet().iterator();
+					Iterator<?> it4 = sorted_table_aid_player.entrySet().iterator();
 					while (it4.hasNext()) {
 						Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it4.next();
 						if (pair.getValue().getPosition() != -1 && pair.getValue().isInGame()) {
@@ -329,54 +410,58 @@ public class psi23_MainAg extends Agent {
 						}
 					}
 
+					finish_game_Behaviour();
+					first_round = false;
 					player_win_round(id_player_winner());
-					step = 0;
+					if (!finish_game)
+						step = 0;
+					else {
+						step++;
+					}
+					break;
+				default:
 					break;
 
 				}
 			}
 		}
-	}
 
-	private class finish_game_Behaviour extends CyclicBehaviour {
-
-		private AID player_lost;
+		public int onEnd() {
+			if (played_juegos != numero_de_juegos_por_partida) {
+				set_all_players_in_game();
+				finish_game_Behaviour();
+				first_round = true;
+				played_juegos++;
+				addBehaviour(new gameBehaviour());
+			}
+			return step;
+		}
 
 		@Override
-		public void action() {
-			int count_players = 0;
-			Iterator<?> it = table_aid_player.entrySet().iterator();
-			while (it.hasNext()) {
-				Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
-				if (pair.getValue().isInGame()) {
-					count_players++;
-					setPlayer_lost(pair.getKey());
-					setFinish_game(true);
-				}
+		public boolean done() {
+			if (finish_game)
+				System.out.println(finish_game);
+			return finish_game;
+		}
+	}
+
+	private void finish_game_Behaviour() {
+
+		int count_players = 0;
+		Iterator<?> it = table_aid_player.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it.next();
+			if (pair.getValue().isInGame()) {
+				count_players++;
 			}
-
-			if (count_players == 1) {
-				setFinish_game(true);
-			} else {
-				setFinish_game(false);
-			}
 		}
 
-		/**
-		 * @return the player_lost
-		 */
-		public AID getPlayer_lost() {
-			return player_lost;
+		if (count_players == 1) {
+			setFinish_game(true);
+			first_round = true;
+		} else {
+			setFinish_game(false);
 		}
-
-		/**
-		 * @param player_lost
-		 *            the player_lost to set
-		 */
-		public void setPlayer_lost(AID player_lost) {
-			this.player_lost = player_lost;
-		}
-
 	}
 
 }

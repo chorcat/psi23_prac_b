@@ -113,7 +113,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 	public void actionPerformed(ActionEvent e) {
 		switch (e.getActionCommand()) {
 		case "Nuevo":
-			System.out.println("------------------------------------------------------");
+			System.out.println("----------------------- NUEVA PARTIDA -------------------------------");
 			mainAgent.setStop_gameBehaviour(false);
 			mainAgent.setFinish_game(false);
 			mainAgent.removeGameBehaviour();
