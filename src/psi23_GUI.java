@@ -123,7 +123,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 	private void drawPanel() {
 		GridBagConstraints constraints = new GridBagConstraints();
 
-		// Posición TextArea de Area de Información
+		// Posicion TextArea de Area de Información
 		constraints.gridx = 6;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -136,7 +136,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.weightx = 0.0;
 		constraints.weighty = 0.0;
 
-		// Posición TextArea de Area de Jugadores
+		// Posicion TextArea de Area de Jugadores
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridwidth = 6;
@@ -149,7 +149,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.weightx = 0.0;
 		constraints.weighty = 0.0;
 
-//		// Posición TextArea de Matriz de Pagos
+//		// Posicion TextArea de Matriz de Pagos
 //		constraints.gridx = 0;
 //		constraints.gridy = 2;
 //		constraints.gridwidth = 6;
@@ -162,7 +162,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 //		constraints.weightx = 0.0;
 //		constraints.weighty = 0.0;
 
-		// Posición Botón New Game
+		// Posicion Boton New Game
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -172,7 +172,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.insets = new Insets(1, 1, 1, 1);
 		this.getContentPane().add(this.buttonNew, constraints);
 
-		// Posición Botón Stop Game
+		// Posicion Boton Stop Game
 		constraints.gridx = 1;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -182,7 +182,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.insets = new Insets(1, 1, 1, 1);
 		this.getContentPane().add(this.buttonStop, constraints);
 
-		// Posición Botón Continue Game
+		// Posicion Boton Continue Game
 		constraints.gridx = 2;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -192,7 +192,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.insets = new Insets(1, 1, 1, 1);
 		this.getContentPane().add(this.butttonContinue, constraints);
 
-		// Posición Botón Number of Players
+		// Posicion Boton Number of Players
 		constraints.gridx = 3;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -202,7 +202,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 		constraints.insets = new Insets(1, 20, 1, 20);
 		this.getContentPane().add(this.labelNPlayers, constraints);
 
-		// Posición Botón Number of Games
+		// Posicion Boton Number of Games
 		constraints.gridx = 4;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
