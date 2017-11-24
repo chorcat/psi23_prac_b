@@ -123,7 +123,7 @@ public class psi23_GUI extends JFrame implements ActionListener, ItemListener, W
 	private void drawPanel() {
 		GridBagConstraints constraints = new GridBagConstraints();
 
-		// Posicion TextArea de Area de Información
+		// Posicion TextArea de Area de Informacion
 		constraints.gridx = 6;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
