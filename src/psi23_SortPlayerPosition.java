@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import jade.core.AID;
 
-public class SortPlayerPosition implements Comparator<Map.Entry<AID, psi23_Player>> {
+public class psi23_SortPlayerPosition implements Comparator<Map.Entry<AID, psi23_Player>> {
 
 	@Override
 	public int compare(Entry<AID, psi23_Player> o1, Entry<AID, psi23_Player> o2) {

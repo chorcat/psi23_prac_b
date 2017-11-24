@@ -138,7 +138,7 @@ public class psi23_MainAg extends Agent {
 
 		List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
 				table_aid_player.entrySet());
-		Collections.sort(list, new SortPlayerPosition());
+		Collections.sort(list, new psi23_SortPlayerPosition());
 		for (Entry<AID, psi23_Player> entry : list) {
 			if (entry.getValue().isInGame())
 				sorted_table_aid_player.put(entry.getKey(), entry.getValue());
@@ -164,7 +164,7 @@ public class psi23_MainAg extends Agent {
 
 		List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
 				table_aid_player.entrySet());
-		Collections.sort(list, new SortPlayerID());
+		Collections.sort(list, new psi23_SortPlayerID());
 		for (Entry<AID, psi23_Player> entry : list) {
 			sorted_table_aid_player.put(entry.getKey(), entry.getValue());
 		}
@@ -185,7 +185,7 @@ public class psi23_MainAg extends Agent {
 
 		List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
 				table_aid_player.entrySet());
-		Collections.sort(list, new SortPlayerPosition());
+		Collections.sort(list, new psi23_SortPlayerPosition());
 		for (Entry<AID, psi23_Player> entry : list) {
 			sorted_table_aid_player.put(entry.getKey(), entry.getValue());
 		}
@@ -402,7 +402,7 @@ public class psi23_MainAg extends Agent {
 				sorted_table_aid_player = new LinkedHashMap<AID, psi23_Player>();
 				List<Map.Entry<AID, psi23_Player>> list = new LinkedList<Map.Entry<AID, psi23_Player>>(
 						table_aid_player.entrySet());
-				Collections.sort(list, new SortPlayerPosition());
+				Collections.sort(list, new psi23_SortPlayerPosition());
 				for (Entry<AID, psi23_Player> entry : list) {
 					sorted_table_aid_player.put(entry.getKey(), entry.getValue());
 				}
