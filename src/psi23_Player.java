@@ -1,4 +1,4 @@
-package agents;
+
 
 public class psi23_Player {
 
@@ -132,8 +132,7 @@ public class psi23_Player {
 	}
 
 	public String toString() {
-		return this.name + " => ID=" + this.id + " isInGame=" + this.isInGame() + " position=" + this.position
-				+ " myCoins=" + this.mycoins + " myBet=" + this.mybet;
+		return this.name + "\t" + this.id + "\t" + this.position + "\t" + this.games_win + "\t" + this.games_lost;
 	}
 
 }

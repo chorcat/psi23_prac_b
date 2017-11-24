@@ -1,4 +1,4 @@
-package agents;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +14,11 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-public class psi23_Fixed extends Agent {
+public class psi23_Random extends Agent {
 
 	private int id;
 	private int position;
 	private Behaviour gameBehaviour;
-	private static final int mycoins = 2;
 
 	protected void setup() {
 		System.out.println("Hello! Fixed Agent " + getAID().getName());
@@ -51,6 +50,11 @@ public class psi23_Fixed extends Agent {
 		}
 		System.out.println("Player Agent " + getAID().getName() + " terminating.");
 	}
+	
+	private int myCoins() {
+		return (int) Math.floor(Math.random()*4);
+	}
+
 
 	private class getIdBehaviour extends OneShotBehaviour {
 
@@ -81,14 +85,14 @@ public class psi23_Fixed extends Agent {
 				ACLMessage msg = blockingReceive();
 				if (msg != null) {
 					position = Integer.parseInt(msg.getContent().split("#")[2]);
-					System.out.println(getAID().getLocalName() + " he recibido la lista de IDs => "
+					System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " he recibido la lista de IDs => "
 							+ msg.getContent().split("#")[1]);
-					System.out.println(getAID().getLocalName() + " he recibido la posicion => " + position);
+					System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " he recibido la posicion => " + position);
 					number_of_players_in_game = msg.getContent().split("#")[1].split(",").length;
 
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.INFORM);
-					reply.setContent("MyCoins#" + mycoins);
+					reply.setContent("MyCoins#" + myCoins());
 					send(reply);
 
 				}
@@ -96,7 +100,7 @@ public class psi23_Fixed extends Agent {
 				break;
 			case 1:
 				int max_bet = number_of_players_in_game * 3;
-				int min_bet = mycoins;
+				int min_bet = myCoins();
 				int mybet;
 				list_bets = new ArrayList<>();
 				Random random = new Random();
@@ -105,7 +109,7 @@ public class psi23_Fixed extends Agent {
 				ACLMessage msg2 = blockingReceive();
 				if (msg2.getContent().split("#").length > 1) {
 					list_bets = new ArrayList<>(Arrays.asList(msg2.getContent().split("#")[1].split(",")));
-					System.out.println(getAID().getLocalName() + " he recibido la lista de apuestas => " + list_bets);
+					System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " he recibido la lista de apuestas => " + list_bets);
 					while (list_bets.contains(String.valueOf(mybet))) {
 						mybet = random.nextInt(max_bet - min_bet + 1) + min_bet;
 					}
@@ -120,7 +124,7 @@ public class psi23_Fixed extends Agent {
 				break;
 			case 2:
 				ACLMessage msg3 = blockingReceive();
-				System.out.println(getAID().getLocalName() + " => " + msg3.getContent());
+				System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " => " + msg3.getContent());
 				step = 0;
 				break;
 			}
