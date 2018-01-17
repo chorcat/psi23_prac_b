@@ -118,7 +118,7 @@ public class psi23_MainAg extends Agent {
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		System.out.println("Main Agent " + getAID().getName() + " terminating.");
+		//System.out.println("Main Agent " + getAID().getName() + " terminating.");
 	}
 
 	private int total_players_in_game() {
@@ -287,7 +287,7 @@ public class psi23_MainAg extends Agent {
 			if (psi23_GUI.isCheck_comments())
 				psi23_GUI.getAreaInfo().append(
 						"\n" + getAID().getLocalName() + " => El ganador fue => " + player_winner.getLocalName());
-			System.out.println(getAID().getLocalName() + " => El ganador fue => " + player_winner.getLocalName());
+			//System.out.println(getAID().getLocalName() + " => El ganador fue => " + player_winner.getLocalName());
 			table_aid_player.get(player_winner).setGames_win(table_aid_player.get(player_winner).getGames_win() + 1);
 			table_aid_player.get(player_winner).setInGame(false);
 			table_aid_player.get(player_winner).setMybet(-1);
@@ -296,8 +296,8 @@ public class psi23_MainAg extends Agent {
 			winner_round = true;
 		} else {
 			if (psi23_GUI.isCheck_comments())
-				psi23_GUI.getAreaInfo().append("\n" + getAID().getLocalName() + " => No hubo ganador esta ronda.");
-			System.out.println(getAID().getLocalName() + " => No hubo ganador esta ronda.");
+				psi23_GUI.getAreaInfo().append("\n" + getAID().getLocalName() + " => No hubo ganador.");
+			//System.out.println(getAID().getLocalName() + " => No hubo ganador esta ronda.");
 			winner_round = false;
 		}
 
@@ -305,13 +305,13 @@ public class psi23_MainAg extends Agent {
 		Iterator<?> it2 = table_aid_player.entrySet().iterator();
 		while (it2.hasNext()) {
 			Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it2.next();
-			System.out.println(pair.getValue());
+			//System.out.println(pair.getValue());
 			if (psi23_GUI.isCheck_comments())
 				psi23_GUI.getListPlayers().append("\n" + pair.getValue());
 		}
 		if (psi23_GUI.isCheck_comments())
 			psi23_GUI.getAreaInfo().append("\n-----------------------------------------------------");
-		System.out.println("-----------------------------------------------------");
+		//System.out.println("-----------------------------------------------------");
 	}
 
 	private void set_all_players_in_game() {
@@ -381,7 +381,7 @@ public class psi23_MainAg extends Agent {
 				Iterator<?> it10 = table_aid_player.entrySet().iterator();
 				while (it10.hasNext()) {
 					Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it10.next();
-					System.out.println(pair.getValue());
+					//System.out.println(pair.getValue());
 					psi23_GUI.getListPlayers().append("\n" + pair.getValue());
 				}
 				
@@ -418,13 +418,7 @@ public class psi23_MainAg extends Agent {
 						if (psi23_GUI.isCheck_comments())
 							psi23_GUI.getAreaInfo().append("\n" + request.getContent());
 						send(request);
-					}
-				}
-
-				Iterator<Entry<AID, psi23_Player>> it2 = sorted_table_aid_player.entrySet().iterator();
-				while (it2.hasNext()) {
-					Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it2.next();
-					if (pair.getValue().getPosition() != -1 && pair.getValue().isInGame()) {
+						
 						ACLMessage msg = blockingReceive();
 						pair.getValue().setMycoins(Integer.parseInt(msg.getContent().split("#")[1]));
 						if (psi23_GUI.isCheck_comments())
@@ -432,10 +426,11 @@ public class psi23_MainAg extends Agent {
 									.append("\n" + getAID().getLocalName() + " => el Player ("
 											+ pair.getValue().getName() + ") ha escondido "
 											+ pair.getValue().getMycoins() + " monedas");
-						System.out.println(getAID().getLocalName() + " => el Player (" + pair.getValue().getName()
-								+ ") ha escondido " + pair.getValue().getMycoins() + " monedas");
+						//System.out.println(getAID().getLocalName() + " => el Player (" + pair.getValue().getName()
+						//		+ ") ha escondido " + pair.getValue().getMycoins() + " monedas");
 					}
 				}
+
 				step++;
 				break;
 			case 2:
@@ -457,9 +452,9 @@ public class psi23_MainAg extends Agent {
 									.append("\n" + getAID().getLocalName() + " => el Player ("
 											+ msg2.getSender().getLocalName() + ") ha apostado "
 											+ sorted_table_aid_player.get(msg2.getSender()).getMybet() + " monedas");
-						System.out.println(getAID().getLocalName() + " => el Player (" + msg2.getSender().getLocalName()
-								+ ") ha apostado " + sorted_table_aid_player.get(msg2.getSender()).getMybet()
-								+ " monedas");
+						//System.out.println(getAID().getLocalName() + " => el Player (" + msg2.getSender().getLocalName()
+						//		+ ") ha apostado " + sorted_table_aid_player.get(msg2.getSender()).getMybet()
+						//		+ " monedas");
 					}
 				}
 				step++;
@@ -503,7 +498,7 @@ public class psi23_MainAg extends Agent {
 				if (psi23_GUI.isCheck_comments())
 					psi23_GUI.getAreaInfo()
 							.append("\n" + "\n\n------------JUEGO " + played_juegos + " -----------\n\n");
-				System.out.println("\n\n------------JUEGO " + played_juegos + " -----------\n\n");
+				//System.out.println("\n\n------------JUEGO " + played_juegos + " -----------\n\n");
 				game = new gameBehaviour();
 				addBehaviour(game);
 			}
@@ -511,9 +506,11 @@ public class psi23_MainAg extends Agent {
 			Iterator<?> it2 = table_aid_player.entrySet().iterator();
 			while (it2.hasNext()) {
 				Entry<AID, psi23_Player> pair = (Entry<AID, psi23_Player>) it2.next();
-				System.out.println(pair.getValue());
+				//System.out.println(pair.getValue());
 				psi23_GUI.getListPlayers().append("\n" + pair.getValue());
 			}
+			// cambio
+			step = 0;
 			return step;
 		}
 

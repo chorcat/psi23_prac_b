@@ -1,5 +1,4 @@
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -14,14 +13,15 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-public class psi23_Random extends Agent {
+public class psi23_Intelx extends Agent {
 
 	private int id;
 	private int position;
 	private Behaviour gameBehaviour;
+	private double eval = 0d;
 
 	protected void setup() {
-		//System.out.println("Hello! Random Agent " + getAID().getName());
+		System.out.println("Hello! Intelx Agent " + getAID().getName());
 
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
@@ -48,13 +48,12 @@ public class psi23_Random extends Agent {
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		//System.out.println("Player Agent " + getAID().getName() + " terminating.");
-	}
-	
-	private int myCoins() {
-		return (int) Math.floor(Math.random()*4);
+		// System.out.println("Player Agent " + getAID().getName() + " terminating.");
 	}
 
+	private int myCoins() {
+		return (int) Math.floor(Math.random() * 4);
+	}
 
 	private class getIdBehaviour extends OneShotBehaviour {
 
@@ -63,7 +62,7 @@ public class psi23_Random extends Agent {
 			ACLMessage msg = blockingReceive();
 			if (msg != null) {
 				id = Integer.parseInt(msg.getContent().split("#")[1]);
-				//System.out.println(getAID().getLocalName() + " he recibido el ID => " + id);
+				// System.out.println(getAID().getLocalName() + " he recibido el ID => " + id);
 			}
 			gameBehaviour = new gameBehaviour();
 			addBehaviour(gameBehaviour);
@@ -77,6 +76,8 @@ public class psi23_Random extends Agent {
 		private int number_of_players_in_game = 0;
 		private ArrayList<String> list_bets;
 		private int mycoins;
+		psi23_QLearning ql = new psi23_QLearning();
+		int mybet;
 
 		@Override
 		public void action() {
@@ -86,7 +87,6 @@ public class psi23_Random extends Agent {
 				ACLMessage msg = blockingReceive();
 				if (msg != null) {
 					position = Integer.parseInt(msg.getContent().split("#")[2]);
-			
 					number_of_players_in_game = msg.getContent().split("#")[1].split(",").length;
 
 					mycoins = myCoins();
@@ -99,19 +99,18 @@ public class psi23_Random extends Agent {
 				step++;
 				break;
 			case 1:
-				int max_bet = (number_of_players_in_game-1) * 3 + mycoins;
-				int min_bet = mycoins;
-				int mybet;
-				list_bets = new ArrayList<>();
-				Random random = new Random();
-				mybet = random.nextInt(max_bet - min_bet + 1) + min_bet;
-
 				ACLMessage msg2 = blockingReceive();
+	
+				ql.vGetNewActionQLearning(String.valueOf(number_of_players_in_game) + "_" + String.valueOf(mycoins),
+						((number_of_players_in_game * 3) + 1) - (3 - mycoins), eval);
+				mybet = ql.iNewAction;
 				if (msg2.getContent().split("#").length > 1) {
 					list_bets = new ArrayList<>(Arrays.asList(msg2.getContent().split("#")[1].split(",")));
-					//System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " he recibido la lista de apuestas => " + list_bets);
 					while (list_bets.contains(String.valueOf(mybet))) {
-						mybet = random.nextInt(max_bet - min_bet + 1) + min_bet;
+						ql.vGetNewActionQLearning_it(String.valueOf(number_of_players_in_game) + "_" + String.valueOf(mycoins),
+								((number_of_players_in_game * 3) + 1) - (3 - mycoins), eval, list_bets);
+						mybet = ql.iNewAction;
+
 					}
 				}
 
@@ -119,12 +118,32 @@ public class psi23_Random extends Agent {
 				reply2.setPerformative(ACLMessage.INFORM);
 				reply2.setContent("MyBet#" + mybet);
 				send(reply2);
-				
+
 				step++;
 				break;
 			case 2:
 				ACLMessage msg3 = blockingReceive();
-				//System.out.println(getAID().getLocalName() + "(ID#" + id + ")" + " => " + msg3.getContent());
+				if (Integer.parseInt(msg3.getContent().split("#")[2]) == mybet) {
+					eval += 0.03;
+				} else {
+					eval -= 0.001;
+					if (eval < 0)
+						eval = 0;
+					ql.vGetNewActionQLearning(String.valueOf(number_of_players_in_game) + "_" + String.valueOf(mycoins),
+							((number_of_players_in_game * 3) + 1) - (3 - mycoins), eval);
+					ql.iAction = Integer.parseInt(msg3.getContent().split("#")[2]);
+
+					eval += 0.01;
+					
+//					eval -= 0.001;
+//					if (eval < 0)
+//						eval = 0;
+//					ql.Refuerzo(Integer.parseInt(msg3.getContent().split("#")[2]), eval,
+//							String.valueOf(number_of_players_in_game) + "_" + String.valueOf(mycoins));
+//					eval += 0.01;
+				}
+				if (eval < 0)
+					eval = 0;
 				step = 0;
 				break;
 			}
